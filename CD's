@@ -1,0 +1,53 @@
+// Finds the number of identical CD's jack and jill are holding
+// uses a hashset to store the CD's id
+import java.io.*;
+import java.util.*;
+import java.lang.*;
+  
+class cd {
+  public static void main(String[] args)  {
+    try{
+      InputStreamReader input = new InputStreamReader(System.in);
+      BufferedReader in = new BufferedReader(input);
+      int sum = 0;
+      int tempSum = 0;
+      StringTokenizer str = new StringTokenizer(in.readLine());
+      int Jack = Integer.parseInt(str.nextToken());
+      int Jill = Integer.parseInt(str.nextToken());
+      while((Jack != 0) && (Jill != 0)) {
+        HashSet<Integer> hs = new HashSet<Integer>();
+        HashSet<Integer> js = new HashSet<Integer>();
+        int num;
+        // adding jacks data to set
+        while(tempSum != Jack)  {
+          num = Integer.parseInt(in.readLine());
+          hs.add(num);
+          tempSum++;
+        }
+        // resetting and now adding jills list
+        tempSum = 0;
+        while(tempSum != Jill) {
+          num = Integer.parseInt(in.readLine());
+          js.add(num);
+          tempSum++;
+        }
+        // Now checking to see if values in jacks set match julls
+        for(int i : hs) {
+          if(js.contains(i))  {
+            sum++;
+          }
+        }
+        // printing sum and taking next collection set
+        System.out.println(sum);
+        StringTokenizer Tstr = new StringTokenizer(in.readLine());
+        Jack = Integer.parseInt(Tstr.nextToken());
+        Jill = Integer.parseInt(Tstr.nextToken());
+        tempSum = 0;
+        sum = 0;
+      }
+      
+    }
+    catch(Exception e){}
+    
+  }
+}
