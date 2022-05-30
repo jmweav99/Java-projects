@@ -1,0 +1,147 @@
+// Takes in connected computers and finds the connectivity
+// also supports the destruction of connections
+import java.util.*;
+import java.lang.*;
+import java.io.*;
+public class Destroy {
+    // Helper method just for checking a full true array
+    public static boolean isFalse(boolean[] visited) {
+        for (boolean b: visited) {
+            if (b == false) {
+                return false;
+            }
+        }
+        return true;
+    }
+    // unions all that are connected to a node, i.e 1,3 and 1,2 will be
+    // [2,3] at the first index, 
+    public static boolean union(ArrayList < ArrayList < Integer >> web, int v1, int v2) {
+        if (web.get(v1).contains(v2)) {
+            return false;
+        }
+        if (web.get(v2).contains(v1)) {
+            return false;
+        }
+        web.get(v1).add(v2);
+        web.get(v2).add(v1);
+        return true;
+    }
+    // removes connection on both computers
+    public static void remove(int[][] arr, int removeConnect, ArrayList < ArrayList < Integer >> web) {
+        int v1 = arr[removeConnect][0];
+        int v2 = arr[removeConnect][1];
+        // removes the nodes from each other
+        int temp1 = web.get(v1).lastIndexOf(v2);
+        int temp2 = web.get(v2).lastIndexOf(v1);
+        web.get(v1).remove(temp1);
+        web.get(v2).remove(temp2);
+    }
+    public static ArrayList < Integer > calculate(ArrayList < ArrayList < Integer >>
+        web, int i, int n, boolean[] visited, ArrayList < Integer > held) {
+        int temp = 0;
+        if (visited[i] == false) {
+            visited[i] = true;
+            // if the computer is by itself just return the empty set 
+            if (web.get(i).size() == 0) {
+                held.add(-1);
+                return held;
+            }
+            // off shoot case for if there are two computers only hooked to 
+            eachother
+            if (web.get(i).size() == 1 && web.get(web.get(i).get(0)).size() ==
+                1 && web.get(web.get(i).get(0)).get(0) == i) {
+                visited[web.get(i).get(0)] = true;
+                held.add(web.get(i).get(0));
+                held.add(web.get(web.get(i).get(0)).get(0));
+                return held;
+            }
+            // filling imaginary bubble with all computers connected
+            for (int k = 0; k < web.get(i).size(); k++) {
+                if (!held.contains(web.get(i).get(k))) {
+                    held.add(web.get(i).get(k));
+                }
+            }
+            // recursion call to keep adding all unique digits to the bubble
+            for (int j = 0; j < web.get(i).size(); j++) {
+                if (!visited[web.get(i).get(j)]) {
+                    temp = web.get(i).get(j);
+                    calculate(web, temp, n, visited, held);
+                    j = web.get(i).size() + 1;
+                }
+            }
+        }
+        return held;
+    }
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        int v1, v2;
+        long sum = 0;
+        long total = 0;
+        int point = 0;
+        int numbers = scan.nextInt();
+        int connects = scan.nextInt();
+        int numRemoved = scan.nextInt();
+        boolean[] visited = new boolean[numbers];
+        int[][] arr = new int[connects][2];
+        ArrayList < ArrayList < Integer >> web = new
+        ArrayList < ArrayList < Integer >> ();
+        ArrayList < Integer > held = new ArrayList < Integer > ();
+        for (int i = 0; i < numbers; i++) {
+            web.add(i, new ArrayList < Integer > ());
+        }
+        for (int i = 0; i < connects; i++) {
+            v1 = scan.nextInt();
+            v2 = scan.nextInt();
+            arr[i][0] = v1 - 1;
+            arr[i][1] = v2 - 1;
+            // since my arrays are starting at 0, im just knocking off 1
+            boolean res = Destroy.union(web, v1 - 1, v2 - 1);
+            // Already in the same tree/set.
+        }
+        // if we've seen all or if the index is at the max (number)
+        while (!isFalse(visited) || point != numbers) {
+            calculate(web, point, numbers, visited, held);
+            // case for if we get a single computer with no connections back
+            if (held.size() >= 1 && held.get(0) == -1) {
+                total++;
+                held.clear();
+            } else {
+                sum = held.size();
+                total += sum * sum;
+                held.clear();
+            }
+            point++;
+        }
+        // resets and print
+        System.out.println(total);
+        held.clear();
+        Arrays.fill(visited, false);
+        total = 0;
+        point = 0;
+        // loop for removals
+        for (int i = 0; i < numRemoved; i++) {
+            int num = scan.nextInt();
+            num = num - 1;
+            remove(arr, num, web);
+            // same logic as before at line 102
+            while (!isFalse(visited) || point != numbers) {
+                calculate(web, point, numbers, visited, held);
+                if (held.size() >= 1 && held.get(0) == -1) {
+                    total++;
+                    held.clear();
+                } else {
+                    sum = held.size();
+                    total += sum * sum;
+                    held.clear();
+                }
+                point++;
+            }
+            // resets for next iteration
+            System.out.println(total);
+            point = 0;
+            held.clear();
+            Arrays.fill(visited, false);
+            total = 0;
+        }
+    }
+}
