@@ -1,0 +1,148 @@
+
+// Determines knights that can hit each other on a board
+import java.io.*;
+import java.util.*;
+import java.lang.Math;
+import java.util.ArrayList;
+public class SneakyKnights
+{
+// Since coordinate recieved is a string, a new class, Position,
+// needs to be made in order to store an actual coordinate that
+// can be worked on to find possible attack positions
+  public static class Position
+  {
+    public int row, column;
+    // constructor
+    public Position(int Row, int Column)
+    {
+      this.row = Row;
+      this.column = Column;
+      return;
+    }
+    // reciever functons for Position class
+    public int getRow()
+    {
+      return row;
+    }
+    public int getColumn()
+    {
+      return column;
+    }
+    // Since I need to compare custom objects in the hashmap,
+    // I must override equals() and hashCode()
+    @Override
+    public boolean equals(Object knight)
+    {
+      // this knight object will be the attack positions of the current knight
+      // if this attack position is the same as the position as any other knights
+      // then a hit has been found and return true;
+      Position temp = (Position) knight;
+      if(this.row == temp.row && this.column == temp.column) return true;
+      else return false;
+    }
+    @Override
+    public int hashCode()
+    {
+      int code = row;
+      code = 31 * code + column;
+      return code;
+    }
+  }
+  public static boolean allTheKnightsAreSafe(ArrayList<String> coordinateStrings, 
+int boardSize)
+  {
+    Map<Position, Integer> map = new HashMap<Position, Integer>();
+    // O(n) time complexity to go through arrayList
+    for(int i = 0; i < coordinateStrings.size(); i++)
+    {
+      // Varibles to keep track of conversions, power_ used for math.pow()
+      // sum_ used finding x or y coordinate
+      int sum_row = 0;
+      int sum_col = 0;
+      int power_row = 0;
+      int power_col = 0;
+      int length = coordinateStrings.get(i).length();
+      // iterating through the string O(k) time complexity bring total up to O(nk)
+      for(int j = length-1; j >= 0; j--)
+      {
+        // if ascii code is between 48-57, its a digit so convert from string to 
+integer
+        if(coordinateStrings.get(i).charAt(j) >= 48 && 
+coordinateStrings.get(i).charAt(j) <= 57)
+        {
+          sum_row += (coordinateStrings.get(i).charAt(j) - 48) * (int)Math.pow(10, 
+power_row);
+          power_row++;
+        }
+        // if ascii code is between 97 - 122, its a chara. convert to number than 
+integer.
+        if(coordinateStrings.get(i).charAt(j) >= 97 && 
+coordinateStrings.get(i).charAt(j) <= 122)
+        {
+          sum_col += (coordinateStrings.get(i).charAt(j) - 96) * (int)Math.pow(26, 
+power_col);
+          power_col++;
+        }
+      }
+      // creating a temp Position to insert into Hashmap
+      Position temp = new Position(sum_row, sum_col);
+      map.put(temp,temp.hashCode());
+    }
+    // O(n), 
+    for(Position key : map.keySet()) 
+    { 
+      int row = key.getRow();
+      int column = key.getColumn();
+      // down-left check
+      if(map.containsKey(new Position(row+1,column-2)))
+      {
+        return false;
+      }
+      // down-right check
+      if(map.containsKey(new Position(row+1,column+2)))
+      {
+        return false;
+      }
+      // up-right check
+      if(map.containsKey(new Position(row-1,column+2)))
+      {
+        return false;
+      }
+      // up-left check
+      if(map.containsKey(new Position(row-1,column-2)))
+      {
+        return false;
+      }
+      // down-left check
+      if(map.containsKey(new Position(row+2,column-1)))
+      {
+        return false;
+      }
+      // down-right check
+      if(map.containsKey(new Position(row+2,column+1)))
+      {
+        return false;
+      }
+      // 2 up-right check
+      if(map.containsKey(new Position(row-2,column+1)))
+      {
+        return false;
+      }
+      // 2 up-left check
+      if(map.containsKey(new Position(row-2,column-1)))
+      {
+        return false;
+      }         
+    }
+    return true;
+  }
+  // methods for difficultyRating and Hours spent, returns double
+  public static double difficultyRating()
+  {
+    return 4.1;
+  }
+  public static double hoursSpent()
+  {
+    return 8.3;
+  }
+}
