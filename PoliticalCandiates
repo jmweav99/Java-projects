@@ -1,0 +1,42 @@
+
+// Program to output supporters of given candidate order
+import java.util.*;
+import java.io.*;
+import java.lang.*;
+class politics {
+    public static void main(String[] args) {
+        Scanner stdin = new Scanner(System.in);
+        int nCandidates = stdin.nextInt();
+        int nSupporters = stdin.nextInt();
+        // Start
+        while (nCandidates != 0) {
+            // Using two arraylists as they need to dynamically change
+            ArrayList < String > Candidates = new ArrayList < String > ();
+            ArrayList < String > Pdata = new ArrayList < String > ();
+            // adding the names to the order list
+            for (int i = 0; i < nCandidates; i++) {
+                Candidates.add(i, stdin.next());
+            }
+            for (int i = 0; i < nSupporters; i++) {
+                String Sname = stdin.next();
+                Pdata.add(Sname);
+                String Cname = stdin.next();
+                if (!Candidates.contains(Cname)) {
+                    Candidates.add(Cname);
+                }
+                Pdata.add(Cname);
+            }
+            // For loop for searching, O(mn) runtime
+            for (int i = 0; i < Candidates.size(); i++) {
+                for (int j = 0; j < Pdata.size(); j++) {
+                    if (Pdata.get(j).equals(Candidates.get(i))) {
+                        System.out.println(Pdata.get(j - 1));
+                    }
+                }
+            }
+            // Taking in new # of candidates and supporters
+            nCandidates = stdin.nextInt();
+            nSupporters = stdin.nextInt();
+        }
+    }
+}
