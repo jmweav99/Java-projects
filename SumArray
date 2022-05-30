@@ -1,0 +1,26 @@
+
+// Find the greatest sum of an array without having two
+// numbers next to each other
+import java.io.*;
+import java.util.*;
+import java.lang.*;
+class RunLikeHell {
+    public static int maxGain(int [] blocks)
+    {
+      int old_sum = 0;
+      int sum = blocks[0]; // Using the first index to start with 
+      // For loop cycles through array of n, total time O(N)
+      for(int i = 1; i < blocks.length; i++)
+      {
+        int temp = sum;
+        // Determining if the old sum + the potential block is greater than
+        // the potential block
+        int compareSum = Math.max(old_sum + blocks[i], blocks[i]);
+        // now checking to see if sum or the potential combo is greater
+        sum = Math.max(compareSum, sum); 
+        // setting the old sum
+        old_sum = temp;
+      }
+      return sum;
+    }
+ }
