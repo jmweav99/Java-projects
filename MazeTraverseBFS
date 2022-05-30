@@ -1,0 +1,140 @@
+
+// Find the quickest way of maze using BFS
+import java.util.*;
+import java.io.*;
+import java.lang.*;
+// Creating a node class to hold (x,y)cordinate and distance
+class Node {
+    int x, y, dist;
+    Node(int tempX, int tempY, int tempDist) {
+        x = tempX;
+        y = tempY;
+        dist = tempDist;
+    }
+}
+class Maze {
+    private static final int[] dX = {
+        0,
+        0,
+        1,
+        -1
+    };
+    private static final int[] dY = {
+        1,
+        -1,
+        0,
+        0
+    };
+    public static int row;
+    public static int col;
+    // Checks if x or y is out of bounds, if we hit a wall '!', or a spot thats 
+    already been visited
+    public static boolean safeSpace(boolean[][] visited, char[][] maze, int x, int y) {
+        if (x < 0 || y < 0 || x >= row || y >= col ||
+            visited[x][y] == true || maze[x][y] == '!') {
+            return false;
+        }
+        return true;
+    }
+    // Simple method to find corresponding letter in maze
+    public static boolean findLetter(char letter, char[][] maze, int[] pos, boolean[][] visited) {
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                if (maze[i][j] == letter && visited[i][j] == false) {
+                    pos[0] = i;
+                    pos[1] = j;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    // Using Breadth search to find fastest route to end
+    public static int traverser(boolean[][] visited, char[][] maze, int i, int j,
+        int x, int y) {
+        // Creating a queue to hold spot in maze,
+        Queue < Node > queue = new ArrayDeque < > ();
+        // marks starting place as visited
+        visited[i][j] = true;
+        // using this pos array to find pos of teleporters
+        int[] pos = new int[2];
+        // creating node and adding starting place to queue
+        Node tempNode = new Node(i, j, 0);
+        queue.add(tempNode);
+        // just storing a int that can't be reached and for check at end to see
+        if a path is possible
+        int min_dist = Integer.MAX_VALUE;
+        // iterating until the path is empty
+        while (queue.isEmpty() == false) {
+            // pulling from front of queue
+            Node node = queue.poll();
+            i = node.x;
+            j = node.y;
+            int dist = node.dist;
+            if (i == x && j == y) {
+                min_dist = dist;
+                break;
+            }
+            // adding all attached safe paths from node
+            for (int t = 0; t < 4; t++) {
+                if (safeSpace(visited, maze, i + dX[t], j + dY[t])) {
+                    // adding all teleporter nodes because they're 
+                    imaginary attached
+                    if (maze[i + dX[t]][j + dY[t]] >= 'A' && maze[i + dX[t]]
+                        [j + dY[t]] <= 'Z') {
+                        while (findLetter(maze[i + dX[t]][j + dY[t]],
+                                maze, pos, visited)) {
+                            // Adding two to the dist to account for 
+                            move from tp to tp
+                            Node tpNode = new Node(pos[0], pos[1],
+                                dist + 2);
+                            visited[pos[0]][pos[1]] = true;
+                            queue.add(tpNode);
+                        }
+                    }
+                    visited[i + dX[t]][j + dY[t]] = true;
+                    Node tnode = new Node(i + dX[t], j + dY[t], dist + 1);
+                    queue.add(tnode);
+                }
+            }
+        }
+        // this is the check to see if we found a min path
+        if (min_dist != Integer.MAX_VALUE) {
+            return min_dist;
+        }
+        return -1;
+    }
+    public static void main(String[] args) {
+        Scanner stdin = new Scanner(System.in);
+        int sum = 0;
+        int currx = 0;
+        int curry = 0;
+        int x = 0;
+        int y = 0;
+        Maze.row = stdin.nextInt();
+        Maze.col = stdin.nextInt();
+        char[][] maze = new char[row][col];
+        boolean[][] visited = new boolean[row][col];
+        for (int i = 0; i < row; i++) {
+            String temp = stdin.next();
+            for (int j = 0; j < temp.length(); j++) {
+                if (temp.charAt(j) == '*') {
+                    currx = i;
+                    curry = j;
+                }
+                if (temp.charAt(j) == '$') {
+                    x = i;
+                    y = j;
+                }
+                maze[i][j] = temp.charAt(j);
+            }
+        }
+        // time to solve
+        int solved = traverser(visited, maze, currx, curry, x, y);
+        if (solved != -1) {
+            System.out.println(solved);
+        } else {
+            System.out.println(solved);
+        }
+    }
+}
