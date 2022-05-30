@@ -1,0 +1,137 @@
+// Determines if queens can be hit on a chessboard
+import java.io.*;
+import java.util.*;
+import java.lang.Math;
+import java.util.ArrayList;
+public class SneakyQueens
+  {
+   public static double difficultyRating() // Method for returning difficultyrating
+   {
+     return 3.5;
+   }
+   public static double hoursSpent()// method for returning hours spent
+   { 
+     return 9;
+   }
+  //main method for determining hits, returns bool
+  public static boolean allTheQueensAreSafe(ArrayList<String> coordinateStrings, 
+int boardSize){ 
+        //creating two arraylists to store x & y coord.
+        ArrayList<Integer> ConvertedColArray = 
+converterColumn(coordinateStrings,boardSize); 
+        ArrayList<Integer> ConvertedRowArray = 
+converterRow(coordinateStrings,boardSize);
+        int SetPieceColumn;
+        int CheckPieceColumn;
+        int SetPieceRow;
+        int CheckPieceRow;
+        // Cycling through the arrays to grab each piece
+        for (int i = 0; i < coordinateStrings.size()-1; i++ ){ 
+          SetPieceColumn = ConvertedColArray.get(i); // setting queens to be 
+checked
+          SetPieceRow = ConvertedRowArray.get(i);
+          for (int j = i+1; j < coordinateStrings.size(); j++){ // 
+            CheckPieceColumn = ConvertedColArray.get(j); // setting queens to be 
+checked against 
+            CheckPieceRow = ConvertedRowArray.get(j);
+            // Check to see if queen being held and check queen have the same y 
+coord if they do, they hit
+            if (SetPieceColumn == CheckPieceColumn) 
+            {
+              return false;
+            }
+            //if held queen has same x coord. as check queen they hit
+            if (SetPieceRow == CheckPieceRow)
+            {
+              return false;
+            }
+            //if the held queen and the checker queen have the same sloap, 1 or -1,
+they can hit in a diagonal
+            if ((CheckPieceRow - SetPieceRow) == (CheckPieceColumn - 
+SetPieceColumn) || ((CheckPieceRow - SetPieceRow) == (-1 * (CheckPieceColumn - 
+SetPieceColumn))))
+            {
+              return false;
+            }
+          }
+        }
+    //if no checks pass then no queens can hit
+    return true;
+  }
+ //Method to convert the base 26 system into a base 10 coord. system
+  public static ArrayList<Integer> converterColumn(ArrayList<String> 
+coordinateStrings, int boardSize){
+  ArrayList<Integer> ConvertedColArray = new ArrayList<Integer>();
+    String set_piece = "";
+    String converted_column = "";
+    int column = 0;
+    for (int i = 0; i<coordinateStrings.size(); i++)
+    {
+      //each time this loop cycles these variables need to be reset
+      set_piece = "";
+      converted_column= "";
+      column = 0;
+      //This piece will be checked against all others
+      set_piece = coordinateStrings.get(i);
+      int length = set_piece.length();
+      for (int j = 0; j < length; j++)
+        {
+          //if this check passes then the char in the string is a letter
+          if (set_piece.charAt(j) >= 97 && set_piece.charAt(j) <= 122)
+          {
+            //transfering that character to an empty string
+            converted_column = converted_column + set_piece.charAt(j);
+          }
+        }
+      for (int j = 0; j < converted_column.length(); j++)
+        {
+          //formula for converting base 26 into base 10: (Ascii code of letter - 
+96) * 26^(digit position)
+          column = column + ((converted_column.charAt(j)-96) * (int)Math.pow(26, 
+converted_column.length() - (j+1))); 
+        }
+        ConvertedColArray.add(column);
+    }
+    return ConvertedColArray;
+  }
+  //same process as converting columns
+  public static ArrayList<Integer> converterRow(ArrayList<String> 
+coordinateStrings, int boardSize)
+  {
+    ArrayList<Integer> ConvertedRowArray = new ArrayList<Integer>();
+    String set_piece = "";
+    String converted_row = "";
+    int row = 0;
+    for (int i = 0; i<coordinateStrings.size(); i++)
+      {
+        set_piece = "";
+        converted_row ="";
+        row = 0;
+        set_piece = coordinateStrings.get(i);//This piece will be checked against 
+all others
+        int length = set_piece.length();
+        for (int j = 0; j < length; j++)
+          {
+            //if the ascii code of the character at position j is between 48-57, 
+then its a digit
+            if (set_piece.charAt(j) >= 48 && set_piece.charAt(j) <= 57)
+            {
+              //adding that digit to a string to be  converted
+              converted_row = converted_row + set_piece.charAt(j);
+            }
+          }
+          
+        for (int j = 0; j < converted_row.length(); j++)
+          {
+            //converting the char digit into an int with the formula: (assci code 
+of digit - 48) * 10^(digit position)
+            row = row + ((converted_row.charAt(j) - 48) * (int)Math.pow(10, 
+converted_row.length() - (j+1))); 
+          }
+          //adds to array lsit
+          ConvertedRowArray.add(row);
+      }
+      //returns an array list
+      return ConvertedRowArray;
+    }
+}
