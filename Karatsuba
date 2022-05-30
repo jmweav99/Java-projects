@@ -1,0 +1,152 @@
+// multiplies two polynomials using karatsuba alg.
+import java.io.*;
+import java.math.*;
+import java.lang.*;
+import java.util.*;
+class poly {
+    // poly class; supports creation of polys with another poly
+    // and with a long []
+    public static class Poly {
+        private int length;
+        private long[] coeff;
+        public Poly(long[] vals) {
+            length = vals.length;
+            coeff = new long[length];
+            for (int i = 0; i < length; i++) {
+                coeff[i] = vals[i];
+            }
+        }
+        public Poly(Poly t) {
+            length = t.getLength();
+            coeff = new long[length];
+            for (int i = 0; i < length; i++) {
+                coeff = t.coeff;
+            }
+        }
+        public Poly() {}
+        int getLength() {
+            return coeff.length;
+        }
+        long[] getcoeff() {
+            return coeff;
+        }
+        long getcoeffAt(int i) {
+            return coeff[i];
+        }
+    }
+    public Poly add(Poly a, Poly b) {
+        long[] temp = new long[a.getLength()];
+        for (int i = 0; i < temp.length; i++) {
+            temp[i] = a.getcoeffAt(i) + b.getcoeffAt(i);
+        }
+        Poly t1 = new Poly(temp);
+        return t1;
+    }
+
+    // used to find part of karatsuba
+    public static Poly sub(Poly a, Poly b, Poly c, int length) {
+        long[] temp = new long[length];
+        for (int i = 0; i < length - 1; i++) {
+            temp[i] = a.getcoeffAt(i) - b.getcoeffAt(i) - c.getcoeffAt(i);
+        }
+        Poly sum = new Poly(temp);
+        return sum;
+    }
+    // slow multiplcation method, triggers when base case of size 32 is hit
+    public Poly multSlow(Poly a, Poly b) {
+        long[] temp = new long[a.getLength() * 2 - 1];
+        Arrays.fill(temp, 0);
+        for (int i = 0; i < a.getLength(); i++) {
+            for (int j = 0; j < a.getLength(); j++) {
+                long t1 = temp[i + j] + a.coeff[i] * b.coeff[j];
+                temp[i + j] = t1;
+            }
+        }
+        Poly product = new Poly(temp);
+        return product;
+    }
+    // splits poly, returns left half
+    private Poly getLeft(Poly x) {
+        long[] temp = new long[x.getLength() / 2];
+        for (int i = 0; i < (x.getLength() / 2); i++) {
+            temp[i] = x.coeff[i];
+        }
+        Poly t1 = new Poly(temp);
+        return t1;
+    }
+    // splits polynomial, returns right half
+    private Poly getRight(Poly x) {
+        long[] temp = new long[x.getLength() / 2];
+        int count = 0;
+        for (int i = x.getLength() / 2; i < x.getLength(); i++) {
+            temp[count] = x.coeff[i];
+            count++;
+        }
+        Poly t1 = new Poly(temp);
+        return t1;
+    }
+    // divide and conquer + karatsuba
+    public Poly mult(Poly a, Poly b) {
+        long[] fill = new long[2 * a.getLength()];
+        Poly z = new Poly(fill);
+        z.length = 2 * a.getLength();
+        if (a.getLength() <= 32) {
+            System.out.println("Skipping algth");
+            z = multSlow(a, b);
+            return z;
+        }
+        // creating the pieces needed for karatsuba
+        Poly aleft = new Poly(getLeft(a).getcoeff());
+        Poly aright = new Poly(getRight(a).getcoeff());
+        Poly bleft = new Poly(getLeft(b).getcoeff());
+        Poly bright = new Poly(getRight(b).getcoeff());
+        long[] alAr = new long[a.getLength() / 2];
+        long[] brBl = new long[a.getLength() / 2];
+        // since this is the combination of left + right
+        // its going to be half the size of the orginal
+        for (int i = 0; i < a.getLength() / 2; i++) {
+            alAr[i] = (aleft.coeff[i] + aright.coeff[i]);
+            brBl[i] = (bleft.coeff[i] + bright.coeff[i]);
+        }
+        Poly alar = new Poly(alAr);
+        Poly brbl = new Poly(brBl);
+        // divide and conquer, keep splitting until i've hit base case size
+        Poly t1 = mult(aleft, bleft);
+        Poly t2 = mult(aright, bright);
+        Poly t3 = mult(alar, brbl);
+        Poly product = sub(t3, t1, t2, a.getLength());
+        // Setting up the z result order
+        for (int j = 0, mid = a.getLength() / 2; j < a.getLength() - 1; ++j) {
+            z.coeff[j] = z.coeff[j] + t1.getcoeffAt(j);
+            z.coeff[j + a.getLength()] = z.coeff[j + a.getLength()] +
+                t2.getcoeffAt(j);
+            z.coeff[j + mid] = z.coeff[j + mid] + product.getcoeffAt(j);
+        }
+
+        return z;
+    }
+    public static void main(String[] args) {
+        Scanner stdin = new Scanner(System.in);
+        int n = stdin.nextInt();
+        int deg = (int) Math.pow(2, n);
+        long[] a = new long[deg];
+        long[] b = new long[deg];
+        // taking in input from 2^n-1 down
+        for (int i = deg - 1; i >= 0; i--) {
+            a[i] = stdin.nextInt();
+        }
+        for (int i = deg - 1; i >= 0; i--) {
+            b[i] = stdin.nextInt();
+        }
+        // creating the two poly classes
+        Poly apoly = new Poly(a);
+        Poly bpoly = new Poly(b);
+        poly z = new poly();
+        Poly zpoly = z.mult(apoly, bpoly);
+        for (int i = (deg * 2) - 2; i >= 0; i--) {
+            System.out.println(zpoly.getcoeffAt(i));
+        }
+
+
+    }
+}
