@@ -1,0 +1,270 @@
+// Implentation of skiplists
+import java.io.*;
+import java.util.*;
+import java.lang.Math;
+// Generic Node class
+class Node < T extends Comparable < T >> {
+    public Node < T > next;
+    public T data;
+    public int height;
+    // Using an arraylist to store the attached nodes at the given level(index of
+    list)
+public ArrayList < Node < T >> attached;
+// Constructor for node with just height 
+public Node(int height) {
+    attached = new ArrayList < Node < T >> (height);
+    this.next = null;
+    this.height = height;
+    // Initallizing to null
+    for (int i = 0; i < height + 1; i++) {
+        attached.add(null);
+    }
+}
+// Constructor for dat and input height
+public Node(T data, int height) {
+    attached = new ArrayList < Node < T >> (height);
+    this.next = null;
+    for (int i = 0; i < height + 1; i++) {
+        attached.add(null);
+    }
+    this.data = data;
+    this.height = height;
+}
+public T value() {
+    return data;
+}
+public int height() {
+    return height;
+}
+public Node < T > next(int level) {
+    // Checking for level out of bounds returns null
+    if (level < 0 || level > (height)) {
+        return null;
+    }
+    return attached.get(level);
+}
+public void setNext(int level, Node < T > node) {
+    attached.set(level, node);
+}
+public void grow() {
+    attached.add(null);
+    height++;
+}
+}
+public class SkipList < T extends Comparable < T >> {
+    // For use in randomizing node level
+    Random coinFlip = new Random();
+    public int size = 0;
+    Node < T > head;
+    public SkipList() {
+        head = new Node < T > (0);
+    }
+    public SkipList(int height) {
+        head = new Node < T > (height);
+    }
+    public int size() {
+        return size;
+    }
+    public int height() {
+        return head.height();
+    }
+    public Node < T > head() {
+        return head;
+    }
+    public void insert(T data) {
+        Node < T > curr = head;
+        Node < T > temp;
+        int currLevel = 0;
+        if (size == 0) {
+            head.grow();
+        }
+        // if log_2 (size+1) exceeds height then increases heads hight
+        if (Math.ceil((Math.log(size + 1) / Math.log(2))) > head.height()) {
+            head.grow();
+            // Sets a temp node to one below the new max height
+            // then cycles through all nodes on that level, 50/50 chance to 
+            increase
+            curr = head.next(head.height() - 1);
+            while (curr != null) {
+                if (coinFlip.nextBoolean() == true) {
+                    curr.grow();
+                }
+                curr = curr.next(head.height() - 1);
+            }
+        }
+        curr = head;
+        // random generator for level, for each level of height it has a chance
+        to increase
+        // to head height
+        for (int i = 0; i < head.height() - 1; i++) {
+            if (coinFlip.nextBoolean() == true) {
+                currLevel++;
+            } else {
+                break;
+            }
+        }
+        // creating new node
+        temp = new Node < T > (data, currLevel);
+        // Starting at the top of head, looks right, if no nodes are hit
+        // then drop down and level and look right
+        for (int i = head.height() - 1; i >= 0; i--) // When inserting at a head 
+            height of 1, i = 0, i isnt greater than or = 1, so skips this whole add ? {
+                while (curr.next(i) != null) {
+                    // check to see if the inserted nodes value is greater or 
+                    less than
+                    // the attached node to current
+                    if (curr.next(i).value().compareTo(data) > 0) {
+                        break;
+                    } else {
+                        curr = curr.next(i);
+                    }
+                }
+                // if current node hits a null at its height then there needs to 
+                be a node there
+                if (i <= currLevel) {
+                    // check to see if we're inserting a number that is between
+                    another node
+                    if (curr.next(i) != null) {
+                        temp.setNext(i, curr.next(i));
+                        curr.setNext(i, temp);
+                    } else {
+                        // otherwise we're adding on to the end of the list
+                        curr.setNext(i, temp);
+                        temp.setNext(i, null); // setting new node to NULL
+                    }
+                }
+            }
+        size++;
+    }
+    // This process is the exact same as insert
+    // However randomizer for node level is gone
+    public void insert(T data, int height) {
+        Node < T > curr = head;
+        Node < T > temp;
+        int currLevel = height - 1;
+        if (Math.ceil((Math.log(size + 1) / Math.log(2))) >= head.height()) {
+            head.grow();
+            curr = head.next(head.height() - 1);
+            while (curr != null) {
+                if (coinFlip.nextBoolean() == true) {
+                    curr.grow();
+                }
+                curr = curr.next(head.height() - 1);
+            }
+        }
+        curr = head;
+        temp = new Node < T > (data, currLevel);
+        for (int i = head.height() - 1; i >= 0; i--) {
+            while (curr.next(i) != null) {
+                if (curr.next(i).value().compareTo(data) > 0) {
+                    break;
+                } else {
+                    curr = curr.next(i);
+                }
+            }
+            // if current node hits a null at its height then there needs to 
+            be a node there
+            if (i <= currLevel) {
+                // check to see if we're inserting a number that is between
+                another node
+                temp.setNext(i, curr.next(i));
+                curr.setNext(i, temp);
+            }
+        }
+        size++;
+    }
+    public void delete(T data) {
+        // bool check to see if item even was deleted in case value doesn't 
+        exist
+        boolean deleted = false;
+        Node < T > curr;
+        Node < T > temp = head;
+        ArrayList < Node < T >> array = new ArrayList < Node < T >> (head.height());
+        // initializing arraylist
+        for (int i = 0; i < head.height(); i++) {
+            array.add(null);
+        }
+        // cycling through skiplist
+        for (int i = head.height() - 1; i >= 0; i--) {
+            while (temp.next(i) != null &&
+                temp.next(i).value().compareTo(data) < 0) {
+                temp = temp.next(i);
+            }
+            array.set(i, temp);
+        }
+        temp = temp.next(0);
+        if (temp.value() == data) {
+            deleted = true;
+            size = size - 1;
+            for (int i = 0; i <= head.height() - 1; i++) {
+                if (array.get(i).next(i) == null ||
+                    array.get(i).next(i).value().compareTo(data) != 0) {
+                    break;
+                }
+                array.get(i).setNext(i, temp.next(i));
+            }
+        }
+        // trimming method for deletion, dont want this to run if nothing was 
+        deleted
+        if (deleted == true) {
+            // same check to see if it grows is used
+            if (Math.ceil((Math.log(size) / Math.log(2))) < head.height()) {
+                temp = head;
+                while (temp != null) {
+                    // flip-flopping method
+                    // sets the attached nodes to the target deleted node
+                    to temp
+                    // then reattaches those to the next node in list
+                    Node < T > next = temp.next(head.height - 1);
+                    temp.setNext(head.height - 1, null);
+                    temp.height = temp.height - 1;
+                    temp = next;
+                }
+            }
+        }
+    }
+    public boolean contains(T data) {
+        // cycling method i've used before, uses compareTo for check,
+        Node < T > curr = head;
+        for (int i = head.height(); i >= 0; i--) // When inserting at a head 
+            height of 1, i = 0, i isnt greater than or = 1, so skips this whole add ? {
+                while (curr.next(i) != null) {
+                    if (curr.next(i).value().compareTo(data) == 0) {
+                        return true;
+                    }
+                    if (curr.next(i).value().compareTo(data) > 0) {
+                        break;
+                    } else {
+                        curr = curr.next(i);
+                    }
+                }
+            }
+        return false;
+    }
+    // Same method as contain to find target, however just returns the reference 
+    to node
+    public Node < T > get(T data) {
+        Node < T > curr = head;
+        for (int i = head.height(); i >= 0; i--) // When inserting at a head 
+            height of 1, i = 0, i isnt greater than or = 1, so skips this whole add ? {
+                while (curr.next(i) != null) {
+                    if (curr.next(i).value().compareTo(data) == 0) {
+                        return curr.next(i);
+                    }
+                    if (curr.next(i).value().compareTo(data) > 0) {
+                        break;
+                    } else {
+                        curr = curr.next(i);
+                    }
+                }
+            }
+        return null;
+    }
+    // difficulty and hours spent, >:'(
+    public static double difficultyRating() {
+        return 5.0;
+    }
+    public static double hoursSpent() {
+        return 20.0;
+    }
+}
