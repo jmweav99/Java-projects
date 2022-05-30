@@ -1,0 +1,182 @@
+// Finds the quickest way out of maze with obstacles using recursion
+import java.io.*;
+import java.util.*;
+public class Pathogen {
+    // Used to toggle "animated" output on and off (for debugging purposes).
+    private static boolean animationEnabled = false;
+    // "Animation" frame rate (frames per second).
+    private static double frameRate = 4.0;
+    // Setters. Note that for testing purposes you can call enableAnimation()
+    // from your backtracking method's wrapper method (i.e., the first line of
+    // your public findPaths() method) if you want to override the fact that the
+    // test cases are disabling animation. Just don't forget to remove that
+    // method call before submitting!
+    // Maze constants.
+    private static final char WALL = '#';
+    private static final char PERSON = '@';
+    private static final char EXIT = 'e';
+    private static final char BREADCRUMB = '.'; // visited
+    private static final char SPACE = ' '; // unvisited
+    private static final char PATHOGEN = '*';
+    // Takes a 2D char maze and returns true if it can find a path from the
+    // starting position to the exit. Assumes the maze is well-formed according
+    // to the restrictions above.
+    public static String fasterConcatenation(ArrayList < String > Fpaths) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < Fpaths.size(); i++) {
+            builder.append(Fpaths.get(i));
+        }
+        return builder.toString();
+    }
+    public static HashSet < String > findPaths(char[][] maze) {
+        int height = maze.length;
+        int width = maze[0].length;
+        // The visited array keeps track of visited positions. It also keeps
+        // track of the exit, since the exit will be overwritten when the '@'
+        // symbol covers it up in the maze[][] variable. Each cell contains one
+        // of three values:
+        //
+        //   '.' -- visited
+        //   ' ' -- unvisited
+        //   'e' -- exit
+        HashSet < String > Fpaths = new HashSet < String > ();
+        char[][] visited = new char[height][width];
+        int[][] copy = new int[height][width];
+        ArrayList < String > paths = new ArrayList < String > ();
+        for (int i = 0; i < height; i++) {
+            Arrays.fill(visited[i], SPACE);
+            Arrays.fill(copy[i], 1);
+        }
+        // Find starting position (location of the '@' character).
+        int startRow = -1;
+        int startCol = -1;
+        int endRow = -1;
+        int endCol = -1;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (maze[i][j] == WALL || maze[i][j] == PATHOGEN) {
+                    copy[i][j] = 0;
+                }
+                if (maze[i][j] == EXIT) {
+                    endRow = i;
+                    endCol = j;
+                }
+                if (maze[i][j] == PERSON) {
+                    startRow = i;
+                    startCol = j;
+                }
+            }
+        }
+        // Let's gooooooooo!!
+        int[][] temp = solveMaze(Fpaths, maze, paths, copy, visited, startRow,
+            startCol, height, width, endRow, endCol);
+        return Fpaths;
+    }
+    // Not sure why this failed a test case, so putting it in
+    public static void disableAnimation() {}
+    private static int[][] solveMaze(HashSet < String > Fpaths, char[][] maze,
+        ArrayList < String > paths, int[][] copy, char[][] visited, int currentRow,
+        int currentCol, int height, int width, int endRow, int endCol) {
+        // base statement check to see if we're at the maze exit
+        if (currentRow == endRow && currentCol == endCol) {
+            String temp = "";
+            temp = fasterConcatenation(paths);
+            temp = temp.trim();
+            Fpaths.add(temp);
+            return copy;
+        }
+        // Moves: left, right, up, down
+        int[][] moves = new int[][] {
+            {
+                0,
+                -1
+            }, {
+                0,
+                1
+            }, {
+                -1,
+                0
+            }, {
+                1,
+                0
+            }
+        };
+        for (int i = 0; i < moves.length; i++) {
+            int newRow = currentRow + moves[i][0];
+            int newCol = currentCol + moves[i][1];
+            // Check move is in bounds, not a wall, and not marked as 
+            visited.
+            if(!isLegalMove(copy, visited, newRow, newCol, height, width))
+            continue;
+            // adding the move to the paths arraylist
+            if (i == 0) {
+                paths.add("l ");
+            }
+            if (i == 1) {
+                paths.add("r ");
+            }
+            if (i == 2) {
+                paths.add("u ");
+            }
+            if (i == 3) {
+                paths.add("d ");
+            }
+            if (maze[newRow][newCol] == EXIT)
+                visited[newRow][newCol] = EXIT;
+            maze[currentRow][currentCol] = BREADCRUMB;
+            visited[currentRow][currentCol] = BREADCRUMB;
+            copy[currentRow][currentCol] = 2;
+            maze[newRow][newCol] = PERSON;
+            // Perform recursive descent.
+            solveMaze(Fpaths, maze, paths, copy, visited, newRow, newCol,
+                height, width, endRow, endCol);
+            // when backtracking im going to remove it from the paths 
+            arraylist
+            paths.remove(paths.size() - 1);
+            // Undo state change. Note that if we return from the previous 
+            call,
+            // we know visited[newRow][newCol] did not contain the exit, and
+            // therefore already contains a breadcrumb, so I haven't updated
+            // that here.
+            maze[newRow][newCol] = BREADCRUMB;
+            maze[currentRow][currentCol] = PERSON;
+            // This conditional block prints the maze when a move gets undone
+            // (which is effectively another kind of move).
+        }
+        return copy;
+    }
+    // Returns true if moving to row and col is legal (i.e., we have not visited
+    // that position before, and it's not a wall).
+    private static boolean isLegalMove(int[][] maze, char[][] visited,
+        int row, int col, int height, int width) {
+        // checking if it is an out of bound move
+        if (row < 0 || col < 0 || row >= height || col >= width) {
+            return false;
+        } else if (maze[row][col] == 0 || visited[row][col] == BREADCRUMB) {
+            return false;
+        } else return true;
+    }
+    // Read maze from file. This function dangerously assumes the input file
+    // exists and is well formatted according to the specification above.
+    private static char[][] readMaze(String filename) throws IOException {
+        Scanner in = new Scanner(new File(filename));
+        int height = in .nextInt();
+        int width = in .nextInt();
+        char[][] maze = new char[height][];
+        // After reading the integers, there's still a new line character we
+        // need to do away with before we can continue.
+        in .nextLine();
+        for (int i = 0; i < height; i++) {
+            // Explode out each line from the input file into a char array.
+            maze[i] = in .nextLine().toCharArray();
+        }
+        return maze;
+    }
+    // Requested methods
+    public static double difficultyRating() {
+        return 3.5;
+    }
+    public static double hoursSpent() {
+        return 10.1;
+    }
+}
