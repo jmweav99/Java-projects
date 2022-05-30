@@ -1,0 +1,175 @@
+
+// ====================
+// Basic binary search tree (BST) implementation that supports insert() and delete()
+// ====================
+
+import java.io.*;
+import java.util.*;
+// Node construction, extends comparable <T> to take
+// in any data field
+class Node < T extends Comparable < T >> {
+    T data;
+    Node < T > left;
+    Node < T > right;
+    Node(T data) {
+        this.data = data;
+    }
+}
+public class GenericBST < T extends Comparable < T >> {
+    private Node < T > root;
+    public void insert(T data) {
+        root = insert(root, data);
+    }
+    private Node < T > insert(Node < T > root, T data) {
+        // If root is NUll
+        if (root == null) {
+            return new Node < T > (data);
+        }
+        // If target data is less than the node data
+        // recall the function with the left child and
+        // set the left root of node to the returned value
+        else if (data.compareTo(root.data) < 0) {
+            root.left = insert(root.left, data);
+        }
+        // If target dta is more than current node data,
+        // recall the function with the right child and
+        // set right root of node to the returned value
+        else if (data.compareTo(root.data) > 0) {
+            root.right = insert(root.right, data);
+        }
+        return root;
+    }
+    public void delete(T data) {
+        root = delete(root, data);
+    }
+    private Node < T > delete(Node < T > root, T data) {
+        if (root == null) {
+            return null;
+        }
+        // If target data is less than the node data
+        // recall the function with the left child and
+        // set the left root of node to the returned value
+        else if (data.compareTo(root.data) < 0) {
+            root.left = delete(root.left, data);
+        }
+        // If target dta is more than current node data,
+        // recall the function with the right child and
+        // set right root of node to the returned value
+        else if (data.compareTo(root.data) > 0) {
+            root.right = delete(root.right, data);
+        } else {
+            // if node has both no left or right child then it has hit the 
+            bottom,
+            returning NULL
+            if (root.left == null && root.right == null) {
+                return null;
+            }
+            // If node has no left child but has right child, return right 
+            child
+            else if (root.left == null) {
+                return root.right;
+            }
+            // If node has no right child but has left, return left
+            else if (root.right == null) {
+                return root.left;
+            }
+            // If there are two children, then set the largest element on
+            // the left side and set the left child to the returned value of 
+            // the recursive call
+            else {
+                root.data = findMax(root.left);
+                root.left = delete(root.left, root.data);
+            }
+        }
+        return root;
+    }
+    // This method assumes root is non-null, since this is only called by
+    // delete() on the left subtree, and only when that subtree is not empty.
+    private T findMax(Node < T > root) {
+        // Since the largest element is going to be on the right
+        // most child, keep traversing until you've hit a null child on right
+        while (root.right != null) {
+            root = root.right;
+        }
+        return root.data;
+    }
+    public boolean contains(T data) {
+        return contains(root, data);
+    }
+    // Search method for finding specific data, if found returns true
+    // Uses 'compareTo' as it will compare any type of data
+    private boolean contains(Node < T > root, T data) {
+        // If the root is NULL then we've hit the end of the tree, return false
+        if (root == null) {
+            return false;
+        }
+        // If the Nodes data is less than the target data,
+        // Recall the function using the nodes left child as the root
+        else if (data.compareTo(root.data) < 0) {
+            return contains(root.left, data);
+        }
+        // If the Nodes data is more than the target data,
+        // Recall the function using the nodes right child as the root
+        else if (data.compareTo(root.data) > 0) {
+            return contains(root.right, data);
+        }
+        // If none of the other checks passed then we've found the target data
+        else {
+            return true;
+        }
+    }
+    // Method to start the inorder recursive call
+    public void inorder() {
+        System.out.print("In-order Traversal:");
+        inorder(root);
+        System.out.println();
+    }
+    // Traveres the tree with the order - left, root, right
+    private void inorder(Node < T > root) {
+        if (root == null)
+            return;
+        inorder(root.left);
+        System.out.print(" " + root.data);
+        inorder(root.right);
+    }
+    // Method to start the preorder recursive call
+    public void preorder() {
+        System.out.print("Pre-order Traversal:");
+        preorder(root);
+        System.out.println();
+    }
+    // traverses tree with root, left, right
+    private void preorder(Node < T > root) {
+        if (root == null)
+            return;
+        System.out.print(" " + root.data);
+        preorder(root.left);
+        preorder(root.right);
+    }
+    // Method To start the postorder traversal, calls the recursive function 
+    postorder
+    public void postorder() {
+        System.out.print("Post-order Traversal:");
+        postorder(root);
+        System.out.println();
+    }
+    // Post order is Left, Right, root
+    private void postorder(Node < T > root) {
+        if (root == null)
+            return;
+        // Will recursevly keep traveling down left path until null
+        postorder(root.left);
+        postorder(root.right);
+        System.out.print(" " + root.data);
+    }
+    public static double difficultyRating() {
+        //Range of 1 to 5, 1 being very easy 5 being very hard
+        double rating = 1.5;
+        return rating;
+    }
+    public static double hoursSpent() {
+        //The amount of hours worked on assignment
+        double hours = .5;
+        return hours;
+    }
+}
